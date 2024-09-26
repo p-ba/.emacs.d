@@ -1,10 +1,9 @@
-(when (package-installed-p 'kuronami-theme)
-  (load-theme 'kuronami t))
-(set-face-attribute 'default nil :height 150)
+(set-face-attribute 'default nil :font "Iosevka Comfy" :height 170)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
-(electric-indent-mode -1)
-(electric-pair-mode 1)
+(electric-indent-mode 1)
+;; (electric-pair-mode 1)
+(setq ring-bell-function 'ignore)
 (setq inhibit-startup-screen t)
 (global-auto-revert-mode 1)
 (setq custom-file "~/.emacs.d/init-custom.el")
@@ -25,7 +24,6 @@
       undo-tree
       web-mode
       evil
-      kuronami-theme
       vue-mode
       vue-html-mode
       php-mode
@@ -58,6 +56,12 @@
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
+(use-package organic-green-theme
+  :init (progn (load-theme 'organic-green t)
+               (enable-theme 'organic-green))
+  :defer t
+  :ensure t)
+
 (use-package dumb-jump
   :config
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
@@ -78,7 +82,14 @@
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 
-(use-package rg)
+(use-package rg
+  :config
+  (rg-define-search rg-all
+	:dir project
+	:flags ("--no-ignore")))
+
+(use-package php-find-use
+  :load-path "my-packages/")
 
 (use-package evil
   :config
@@ -108,13 +119,19 @@
   (evil-define-key 'normal 'global (kbd "<leader>p") 'project-switch-project)
   (evil-define-key 'normal 'global (kbd "<leader>f") 'consult-fd)
   (evil-define-key 'normal 'global (kbd "<leader>g") 'rg-project)
+  (evil-define-key 'normal 'global (kbd "<leader>G") 'rg-all)
   (evil-define-key 'normal 'global (kbd "<leader>r") 'consult-imenu)
   (evil-define-key 'normal 'global (kbd "<leader>b") 'switch-to-buffer)
   (evil-define-key 'normal 'global (kbd "<leader>u") 'universal-argument)
+  (evil-define-key 'normal 'global (kbd "<leader>s") 'save-buffer)
+  (evil-define-key 'normal 'global (kbd "<leader>i") 'php-find-use)
 
-  (dolist (initial-states '((xref--xref-buffer-mode . motion)
-							(occur-mode . motion)
-							(diff-mode . motion)))
+  (dolist (initial-states '((xref--xref-buffer-mode . emacs)
+							(occur-mode . emacs)
+							(vterm-mode . emacs)
+							(shell-mode . emacs)
+							(rg-mode . emacs)
+							(diff-mode . emacs)))
 	(evil-set-initial-state (car initial-states) (cdr initial-states))))
 
 (use-package dabbrev
@@ -131,6 +148,10 @@
 
 (use-package vterm
   :ensure t)
+
+(use-package multi-vterm
+  :ensure t
+  :after vterm)
 
 (use-package undo-tree
   :ensure t
@@ -149,3 +170,4 @@
   (editorconfig-mode 1))
 
 (load custom-file 'noerror 'nomessage)
+(put 'erase-buffer 'disabled nil)
