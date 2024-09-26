@@ -20,7 +20,7 @@
   (when (= (length obj-name) 0)
 	(setq obj-name default-search))
   
-  (setq out (shell-command-to-string (format "grep --include=\'*.php\' -zolr -e \'^class.* %s.*$\' -e \'^interface.* %s.*$\' -e \'^trait.* %s.*$\' \'%s\' | xargs grep -ohe \'^namespace.*;$\'" obj-name obj-name obj-name pwd)))
+  (setq out (shell-command-to-string (format "rg -l --no-ignore --vimgrep -g \'*.{php}\' \'^(class|interface|trait)[\s]*%s[\s\n]\' \'%s\' | xargs grep -ohe \'^namespace.*;$\'" obj-name pwd)))
   (setq results '())
   (dolist (namespace (split-string out "\n"))
 	(unless (= (length namespace) 0)

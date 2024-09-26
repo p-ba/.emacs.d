@@ -1,48 +1,23 @@
-(set-face-attribute 'default nil :font "Iosevka Comfy" :height 170)
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
+(add-to-list 'load-path (concat user-emacs-directory "my-packages/"))
+
 (electric-indent-mode 1)
-;; (electric-pair-mode 1)
-(setq ring-bell-function 'ignore)
-(setq inhibit-startup-screen t)
 (global-auto-revert-mode 1)
-(setq custom-file "~/.emacs.d/init-custom.el")
-(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
-(setq auto-save-file-name-transforms `((".*" "~/.emacs.d/saves" t)))
+
+(setq
+ use-short-answers t
+ y-or-n-p-use-read-key t 
+ ring-bell-function 'ignore
+ scroll-preserve-screen-position t
+ inhibit-startup-screen t
+ custom-file "~/.emacs.d/init-custom.el"
+ backup-directory-alist '(("." . "~/.emacs.d/backups"))
+ auto-save-file-name-transforms `((".*" "~/.emacs.d/saves" t)))
 
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(setq package-native-compile t
+      native-comp-async-report-warnings-errors nil)
 (package-initialize)
-
-(setq required-packages
-     '(markdown-mode
-	  consult
-      vertico
-      magit
-      editorconfig-generate
-      editorconfig
-      undo-tree
-      web-mode
-      evil
-      vue-mode
-      vue-html-mode
-      php-mode
-      dumb-jump
-      corfu
-	  rg
-      treesit-auto
-      tree-sitter-langs))
-
-(setq required-vc-packages
-      '((php-ts-mode "https://github.com/emacs-php/php-ts-mode")))
-
-(dolist (val required-packages)
-  (unless (package-installed-p val)
-    (package-install val)))
-
-(dolist (pval required-vc-packages)
-  (unless (package-installed-p (nth 0 pval))
-    (package-vc-install (nth 1 pval))))
 
 (setq mac-option-key-is-meta nil
       mac-command-key-is-meta t
@@ -56,6 +31,13 @@
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
+(unless (package-installed-p 'php-ts-mode)
+  (package-vc-install "https://github.com/emacs-php/php-ts-mode"))
+
+(use-package emacs
+  :config
+  (set-face-attribute 'default nil :font "Iosevka Comfy" :height 170))
+
 (use-package organic-green-theme
   :init (progn (load-theme 'organic-green t)
                (enable-theme 'organic-green))
@@ -63,6 +45,7 @@
   :ensure t)
 
 (use-package dumb-jump
+  :ensure t
   :config
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
   (setq dumb-jump-force-searcher 'rg))
@@ -74,24 +57,44 @@
 (add-hook 'prog-mode-hook 'prog-mode-init)
 
 (use-package treesit-auto
+  :ensure t
   :custom
-  (treesit-auto-install 'prompt)
+  (treesit-auto-install 'all)
   :config
-  (add-to-list 'major-mode-remap-alist '(php-mode . php-ts-mode))
-  (add-to-list 'major-mode-remap-alist '(php-mode-maybe . php-ts-mode))
   (treesit-auto-add-to-auto-mode-alist 'all)
+  (add-to-list 'treesit-auto-langs 'php)
   (global-treesit-auto-mode))
 
 (use-package rg
+  :ensure t
   :config
   (rg-define-search rg-all
 	:dir project
 	:flags ("--no-ignore")))
 
-(use-package php-find-use
-  :load-path "my-packages/")
+(use-package web-mode
+  :ensure t)
+
+(defun detect-web-mode()
+  (setq now (point))
+  (goto-line 1)
+  (when (search-forward "?>" nil t)
+	(web-mode))
+  (goto-char now))
+
+(use-package php-mode
+  :config
+  (add-hook 'php-mode-hook 'detect-web-mode)
+  :ensure t)
+
+(use-package php-ts-mode
+  :config
+  (add-hook 'php-ts-mode-hook 'detect-web-mode))
+
+(require 'php-find-use)
 
 (use-package evil
+  :ensure t
   :config
   (evil-mode 1)
   (defun forward-evil-word (&optional count)
@@ -117,7 +120,7 @@
   
   (evil-set-leader nil (kbd "SPC"))
   (evil-define-key 'normal 'global (kbd "<leader>p") 'project-switch-project)
-  (evil-define-key 'normal 'global (kbd "<leader>f") 'consult-fd)
+  (evil-define-key 'normal 'global (kbd "<leader>f") 'project-find-file)
   (evil-define-key 'normal 'global (kbd "<leader>g") 'rg-project)
   (evil-define-key 'normal 'global (kbd "<leader>G") 'rg-all)
   (evil-define-key 'normal 'global (kbd "<leader>r") 'consult-imenu)
@@ -143,10 +146,12 @@
 		dabbrev-case-replace nil))
 
 (use-package corfu
+  :ensure t
   :init
   (global-corfu-mode))
 
 (use-package vterm
+  :ensure t
   :ensure t)
 
 (use-package multi-vterm
@@ -169,5 +174,7 @@
   :config
   (editorconfig-mode 1))
 
+(use-package wgrep
+  :ensure t)
+
 (load custom-file 'noerror 'nomessage)
-(put 'erase-buffer 'disabled nil)
