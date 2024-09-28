@@ -31,3 +31,12 @@
 (auto-compile-on-save-mode)
 
 (setq frame-inhibit-implied-resize t)
+
+;; No scroll bars
+(if (fboundp 'scroll-bar-mode) (set-scroll-bar-mode nil))
+;; No toolbar
+(if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+;; No menu bar
+(if (display-graphic-p)
+    (menu-bar-mode t) ;; When nil, focus problem on OSX
+  (menu-bar-mode -1))

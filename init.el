@@ -1,24 +1,5 @@
 (add-to-list 'load-path (concat user-emacs-directory "my-packages/"))
-
-(add-hook 'window-setup-hook 'toggle-frame-maximized t)
-(electric-indent-mode 1)
-(global-auto-revert-mode 1)
-(global-superword-mode t)
-
-(setq-default
-  cursor-in-non-selected-windows nil)
-
-(setq
- use-short-answers t
- y-or-n-p-use-read-key t
- ring-bell-function 'ignore
- scroll-preserve-screen-position t
- inhibit-startup-screen t
- kill-whole-line 1
- custom-file "~/.emacs.d/init-custom.el"
- save-files-directory (expand-file-name "backups/" user-emacs-directory)
- auto-save-file-name-transforms `((".*" ,save-files-directory t))
- backup-directory-alist `(("." . ,save-files-directory)))
+(require 'unfuck)
 
 (require 'package)
 (setq package-native-compile t
@@ -29,17 +10,9 @@
       package-archive-priorities '(("devel" . -1))
       native-comp-async-report-warnings-errors nil)
 
-(use-package nano
-  :ensure t
-  :vc (:url "https://github.com/rougier/nano-emacs" :branch "master"))
+(require 'theme)
 
-;; OSX-specific
-(setq mac-option-key-is-meta nil
-      mac-command-key-is-meta t
-      mac-command-modifier 'meta
-      mac-option-modifier 'super)
 (global-set-key (kbd "s-;") 'pop-to-mark-command)
-
 (global-set-key (kbd "C-=") 'text-scale-increase)
 (global-set-key (kbd "C--") 'text-scale-decrease)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
@@ -48,42 +21,10 @@
 (unless (package-installed-p 'php-ts-mode)
   (package-vc-install "https://github.com/emacs-php/php-ts-mode"))
 
-(use-package emacs
-  :hook
-  (before-save . delete-trailing-whitespace)
-  :custom
-  (set-mark-command-repeat-pop t)
-  (enable-recursive-minibuffers t)
-  (text-mode-ispell-word-completion nil)
-  (read-extended-command-predicate #'command-completion-default-include-p)
-  :config
-  (setq require-final-newline t)
-  (set-face-attribute 'default nil :font "Iosevka Comfy" :height 170)
-  (advice-add 'pop-to-mark-command :around
-            (lambda (pop-to-mark &rest args)
-              (let ((p (point)))
-                (dotimes (_ 5)
-                  (when (= p (point))
-                    (apply pop-to-mark args)))))))
-
 (use-package ace-jump-mode
   :ensure t
   :config
   (global-set-key (kbd "C-;") 'ace-jump-mode))
-
-(use-package dired
-  :custom
-  (setq insert-directory-program "gls")
-  (dired-use-ls-dired t)
-  (dired-recursive-copies 'always)
-  (dired-auto-revert-buffer t)
-  (dired-listing-switches "-Alhv --group-directories-first"))
-
-;; (use-package organic-green-theme
-;;   :init (progn (load-theme 'organic-green t)
-;;                (enable-theme 'organic-green))
-;;   :defer t
-;;   :ensure t)
 
 (use-package dumb-jump
   :ensure t
@@ -93,9 +34,7 @@
 
 (defun prog-mode-config()
   (setq display-line-numbers-type 'relative)
-  (display-line-numbers-mode)
-  (setq tab-width 4)
-  (indent-tabs-mode  nil))
+  (display-line-numbers-mode))
 (add-hook 'prog-mode-hook 'prog-mode-config)
 
 (use-package treesit-auto
@@ -125,13 +64,11 @@
   (goto-char now))
 
 (use-package php-mode
-  :config
-  (add-hook 'php-mode-hook 'detect-web-mode)
-  :ensure t)
+  :ensure t
+  :hook (php-mode . detect-web-mode))
 
 (use-package php-ts-mode
-  :config
-  (add-hook 'php-ts-mode-hook 'detect-web-mode))
+  :hook (php-ts-mode . detect-web-mode))
 
 (use-package php-find-use
   :config
@@ -155,16 +92,26 @@
   :doc "Commands for projects"
   "f" 'project-find-file
   "p" 'project-switch-project
-  "g" 'rg-project
+  "g" 'rg-projectsd
   "r" 'consult-imenu
   "G" 'rg-all
   "u" 'php-find-use)
 
 (keymap-set global-map "C-q" leader-commands)
 
+(defun toggle-evil()
+  (interactive)
+  (if evil-mode
+	  ((global-unset-key (kbd "C-u"))
+	   (evil-define-key 'normal 'global (kbd "<leader>-u") 'unversal-argument)
+	   (evil-define-key 'normal 'global (kbd "C-u") 'scroll-down))
+	(global-set-key (kbd "C-u") 'universal-argument)
+  ))
+
 (setq evil-want-keybinding nil)
 (use-package evil
   :ensure t
+  :hook (evil-mode . (call-interactively toggle-evil))
   :config
   ;; (evil-mode 1)
   (defun forward-evil-word (&optional count)
@@ -185,12 +132,8 @@
 	   #'forward-evil-empty-line)))
   (setq-default evil-symbol-word-search t)
 
-  (global-unset-key (kbd "C-u"))
-  (evil-define-key 'normal 'global (kbd "C-u") 'scroll-down)
-  ;; (use-package evil-collection
-  ;; 	:ensure t
-  ;; 	:config
-  ;; 	(evil-collection-init))
+  (global-set-key (kbd "M-<down>") 'evil-scroll-down)
+  (global-set-key (kbd "M-<up>") 'evil-scroll-up)
 
   (evil-set-leader nil (kbd "SPC"))
   (dolist (keymap leader-commands)
@@ -199,14 +142,12 @@
 	  (when key
 		(evil-define-key 'normal 'global (kbd (format "<leader>%c" key)) (cdr keymap))))))
 
-;;   ;; (dolist (initial-states '((xref--xref-buffer-mode . emacs)
-  ;; 							(occur-mode . emacs)
-  ;; 							(shell-mode . emacs)
-  ;; 							(rg-mode . emacs)
-  ;; 							(diff-mode . emacs)))
-  ;; 	(evil-set-initial-state (car initial-states) (cdr initial-states))))
-
-
+(use-package evil-collection
+  :ensure t
+  :after evil
+  :config
+  (if evil-mode
+	  (evil-collection-init)))
 
 (use-package dabbrev
   ;; Swap M-/ and C-M-/
@@ -222,6 +163,8 @@
 
 (use-package corfu
   :ensure t
+  :custom
+  (text-mode-ispell-word-completion nil)
   :init
   (global-corfu-mode))
 
@@ -270,5 +213,9 @@
   :commands gfm-mode
   :bind (:map markdown-mode-map ("C-c l" . slot/often-used-links))
   :custom (markdown-command "pandoc --standalone --mathjax --from=markdown"))
+
+(use-package which-key
+  :config
+  (which-key-mode))
 
 (load custom-file 'noerror 'nomessage)
