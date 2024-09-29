@@ -11,6 +11,7 @@
       native-comp-async-report-warnings-errors nil)
 
 (require 'theme)
+(require 'prog)
 
 (global-set-key (kbd "s-;") 'pop-to-mark-command)
 (global-set-key (kbd "C-=") 'text-scale-increase)
@@ -18,33 +19,21 @@
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
 
-(unless (package-installed-p 'php-ts-mode)
-  (package-vc-install "https://github.com/emacs-php/php-ts-mode"))
+(defun my/scroll-down()
+  (interactive)
+  (scroll-down -10))
+
+(defun my/scroll-up()
+  (interactive)
+  (scroll-down 10))
+
+(global-set-key (kbd "M-<down>") 'my/scroll-down)
+(global-set-key (kbd "M-<up>") 'my/scroll-up)
 
 (use-package ace-jump-mode
   :ensure t
   :config
   (global-set-key (kbd "C-;") 'ace-jump-mode))
-
-(use-package dumb-jump
-  :ensure t
-  :config
-  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
-  (setq dumb-jump-force-searcher 'rg))
-
-(defun prog-mode-config()
-  (setq display-line-numbers-type 'relative)
-  (display-line-numbers-mode))
-(add-hook 'prog-mode-hook 'prog-mode-config)
-
-(use-package treesit-auto
-  :ensure t
-  :custom
-  (treesit-auto-install 'all)
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (add-to-list 'treesit-auto-langs 'php)
-  (global-treesit-auto-mode))
 
 (use-package rg
   :ensure t
@@ -53,33 +42,16 @@
 	:dir project
 	:flags ("--no-ignore")))
 
-(use-package web-mode
-  :ensure t)
-
-(defun detect-web-mode()
-  (setq now (point))
-  (goto-line 1)
-  (when (search-forward "?>" nil t)
-	(web-mode))
-  (goto-char now))
-
-(use-package php-mode
-  :ensure t
-  :hook (php-mode . detect-web-mode))
-
-(use-package php-ts-mode
-  :hook (php-ts-mode . detect-web-mode))
-
-(use-package php-find-use
-  :config
-  (global-set-key (kbd "C-c f u") 'php-find-use))
-
 (use-package lsp-mode
   :custom
   (lsp-enable-symbol-highlighting nil)
   (lsp-completion-provider :none)
+  (lsp-lens-enable nil)
+  (lsp-headerline-breadcrumb-enable nil)
+  (lsp-diagnostics-provider :none)
   (lsp-enable-file-watchers nil)
-  (lsp-diagnostics-mode -1)
+  (lsp-ui-sideline-enable nil)
+  (lsp-modeline-diagnostics-enable nil)
   :init
   (defun my/lsp-mode-setup-completion ()
     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
@@ -132,9 +104,6 @@
 	   #'forward-evil-empty-line)))
   (setq-default evil-symbol-word-search t)
 
-  (global-set-key (kbd "M-<down>") 'evil-scroll-down)
-  (global-set-key (kbd "M-<up>") 'evil-scroll-up)
-
   (evil-set-leader nil (kbd "SPC"))
   (dolist (keymap leader-commands)
 	(when (consp keymap)
@@ -149,24 +118,16 @@
   (if evil-mode
 	  (evil-collection-init)))
 
-(use-package dabbrev
-  ;; Swap M-/ and C-M-/
-  :bind (("M-/" . dabbrev-completion)
-         ("C-M-/" . dabbrev-expand))
-  :config
-  (setq dabbrev-case-fold-search nil
-		dabbrev-case-replace nil)
-  (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ")
-  (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
-  (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)
-  (add-to-list 'dabbrev-ignored-buffer-modes 'tags-table-mode))
-
 (use-package corfu
   :ensure t
+  :bind
+  (:map corfu-map ("SPC" . corfu-insert-separator))
   :custom
   (text-mode-ispell-word-completion nil)
+  (corfu-echo-documentaion 0.0)
   :init
-  (global-corfu-mode))
+  (global-corfu-mode)
+  (corfu-popupinfo-mode))
 
 (use-package consult
   :custom
@@ -181,9 +142,10 @@
 
 (use-package undo-tree
   :ensure t
+  :custom
+  (undo-tree-history-directory-alist '(("." . (expand-file-name "backups/" user-emacs-directory))))
   :config
-  (global-undo-tree-mode 1)
-  (setq undo-tree-auto-save-history nil))
+  (global-undo-tree-mode 1))
 
 (use-package vertico
   :ensure t

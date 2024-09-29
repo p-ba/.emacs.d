@@ -167,7 +167,7 @@
  ring-bell-function 'ignore
  scroll-preserve-screen-position t
  kill-whole-line 1
- custom-file "~/.emacs.d/init-custom.el"
+ custom-file (expand-file-name "init-custom.el" user-emacs-directory)
  save-files-directory (expand-file-name "backups/" user-emacs-directory)
  auto-save-file-name-transforms `((".*" ,save-files-directory t))
  backup-directory-alist `(("." . ,save-files-directory)))
@@ -195,6 +195,18 @@
   (dired-recursive-copies 'always)
   (dired-auto-revert-buffer t)
   (dired-listing-switches "-Alhv --group-directories-first"))
+
+(use-package dabbrev
+  ;; Swap M-/ and C-M-/
+  :bind (("M-/" . dabbrev-completion)
+         ("C-M-/" . dabbrev-expand))
+  :config
+  (setq dabbrev-case-fold-search nil
+		dabbrev-case-replace nil)
+  (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ")
+  (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
+  (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)
+  (add-to-list 'dabbrev-ignored-buffer-modes 'tags-table-mode))
 
 (desktop-save-mode 1)
 
