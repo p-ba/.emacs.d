@@ -92,7 +92,7 @@
   :doc "Commands for projects"
   "f" 'project-find-file
   "p" 'project-switch-project
-  "g" 'rg-projectsd
+  "g" 'rg-project
   "r" 'consult-imenu
   "G" 'rg-all
   "u" 'php-find-use)
