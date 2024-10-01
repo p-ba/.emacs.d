@@ -21,7 +21,7 @@
 (setq use-dialog-box nil)
 
 ;; No popup windows
-;; (setq pop-up-windows nil)
+(setq pop-up-windows nil)
 
 ;; No empty line indicators
 (setq indicate-empty-lines nil)
@@ -89,7 +89,7 @@
         mac-option-key-is-meta nil
         mac-command-key-is-meta t
         mac-command-modifier 'meta
-        mac-option-modifier nil
+        mac-option-modifier 'super
         mac-use-title-bar nil))
 
 ;; Make sure clipboard works properly in tty mode on OSX
@@ -167,6 +167,7 @@
  ring-bell-function 'ignore
  scroll-preserve-screen-position t
  kill-whole-line 1
+ backup-by-copying 1
  custom-file (expand-file-name "init-custom.el" user-emacs-directory)
  save-files-directory (expand-file-name "backups/" user-emacs-directory)
  auto-save-file-name-transforms `((".*" ,save-files-directory t))

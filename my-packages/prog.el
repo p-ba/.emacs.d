@@ -42,4 +42,11 @@
   :config
   (global-set-key (kbd "C-c f u") 'php-find-use))
 
+(use-package markdown-mode
+  :ensure t
+  :mode (("\\.md$" . gfm-mode))
+  :commands gfm-mode
+  :bind (:map markdown-mode-map ("C-c l" . slot/often-used-links))
+  :custom (markdown-command "pandoc --standalone --mathjax --from=markdown"))
+
 (provide 'prog)

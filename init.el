@@ -12,12 +12,16 @@
 
 (require 'theme)
 (require 'prog)
+(require 'autocomplete)
 
 (global-set-key (kbd "s-;") 'pop-to-mark-command)
 (global-set-key (kbd "C-=") 'text-scale-increase)
 (global-set-key (kbd "C--") 'text-scale-decrease)
 (global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
 (global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
+(global-set-key (kbd "M-n") 'next-error)
+(global-set-key (kbd "M-p") 'previous-error)
+
 
 (defun my/scroll-down()
   (interactive)
@@ -41,24 +45,6 @@
   (rg-define-search rg-all
 	:dir project
 	:flags ("--no-ignore")))
-
-(use-package lsp-mode
-  :custom
-  (lsp-enable-symbol-highlighting nil)
-  (lsp-completion-provider :none)
-  (lsp-lens-enable nil)
-  (lsp-headerline-breadcrumb-enable nil)
-  (lsp-diagnostics-provider :none)
-  (lsp-enable-file-watchers nil)
-  (lsp-ui-sideline-enable nil)
-  (lsp-modeline-diagnostics-enable nil)
-  :init
-  (defun my/lsp-mode-setup-completion ()
-    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-          '(orderless)))
-  :hook
-  (lsp-completion-mode . my/lsp-mode-setup-completion)
-  :ensure t)
 
 (defvar-keymap leader-commands
   :doc "Commands for projects"
@@ -118,45 +104,24 @@
   (if evil-mode
 	  (evil-collection-init)))
 
-(use-package corfu
+(use-package multiple-cursors
   :ensure t
-  :bind
-  (:map corfu-map ("SPC" . corfu-insert-separator))
-  :custom
-  (text-mode-ispell-word-completion nil)
-  (corfu-echo-documentaion 0.0)
-  :init
-  (global-corfu-mode)
-  (corfu-popupinfo-mode))
+  :config
+  (global-set-key (kbd "C->") 'mc/mark-next-like-this)
+  (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+  (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
 
-(use-package consult
-  :custom
-  (consult-async-min-input 1)
-  :ensure t)
-
-(use-package orderless
-  :ensure t
-  :custom
-  (completion-styles '(orderless basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
+(use-package recentf
+  :config
+  (recentf-mode 1)
+  (global-set-key (kbd "C-x C-r") 'recentf))
 
 (use-package undo-tree
   :ensure t
   :custom
-  (undo-tree-history-directory-alist '(("." . (expand-file-name "backups/" user-emacs-directory))))
+  (undo-tree-history-directory-alist `(("." . ,(expand-file-name "backups/" user-emacs-directory))))
   :config
   (global-undo-tree-mode 1))
-
-(use-package vertico
-  :ensure t
-  :config
-  (vertico-mode))
-
-(use-package marginalia
-  :bind (:map minibuffer-local-map
-         ("M-A" . marginalia-cycle))
-  :init
-  (marginalia-mode))
 
 (use-package magit
   :ensure t)
@@ -168,13 +133,6 @@
 
 (use-package wgrep
   :ensure t)
-
-(use-package markdown-mode
-  :ensure t
-  :mode (("\\.md$" . gfm-mode))
-  :commands gfm-mode
-  :bind (:map markdown-mode-map ("C-c l" . slot/often-used-links))
-  :custom (markdown-command "pandoc --standalone --mathjax --from=markdown"))
 
 (use-package which-key
   :config
