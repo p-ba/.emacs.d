@@ -1,5 +1,5 @@
 (unless (package-installed-p 'php-ts-mode)
-  (package-vc-install "https://github.com/emacs-php/php-ts-mode"))
+(package-vc-install "https://github.com/emacs-php/php-ts-mode"))
 
 (use-package dumb-jump
   :ensure t
@@ -11,6 +11,7 @@
   (setq display-line-numbers-type 'relative)
   (display-line-numbers-mode))
 (add-hook 'prog-mode-hook 'prog-mode-config)
+(add-hook 'yaml-mode-hook 'prog-mode-config)
 
 (use-package treesit-auto
   :ensure t
@@ -20,6 +21,11 @@
   (treesit-auto-add-to-auto-mode-alist 'all)
   (add-to-list 'treesit-auto-langs 'php)
   (global-treesit-auto-mode))
+
+(add-to-list 'treesit-language-source-alist
+             '(php "https://github.com/tree-sitter/tree-sitter-php" "master" "php/src"))
+
+(add-hook 'csharp-ts-mode-hook 'csharp-mode)
 
 (use-package web-mode
   :ensure t)
@@ -48,5 +54,10 @@
   :commands gfm-mode
   :bind (:map markdown-mode-map ("C-c l" . slot/often-used-links))
   :custom (markdown-command "pandoc --standalone --mathjax --from=markdown"))
+
+(use-package highlight-indent-guides
+  :ensure t
+  :hook ((yaml-mode . highlight-indent-guides-mode)
+         (yaml-ts-mode . highlight-indent-guides-mode)))
 
 (provide 'prog)

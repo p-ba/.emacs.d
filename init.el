@@ -22,6 +22,24 @@
 (global-set-key (kbd "M-n") 'next-error)
 (global-set-key (kbd "M-p") 'previous-error)
 
+;; kill and copy whone line when no region is active
+(defun slick-cut (beg end &optional arg)
+  (interactive
+   (if mark-active
+       (list (region-beginning) (region-end))
+     (list (line-beginning-position) (line-beginning-position 2)))))
+
+(advice-add 'kill-region :before #'slick-cut)
+
+(defun slick-copy (beg end &optional arg)
+  (interactive
+   (if mark-active
+       (list (region-beginning) (region-end))
+     (message "Copied line")
+     (list (line-beginning-position) (line-beginning-position 2)))))
+
+(advice-add 'kill-ring-save :before #'slick-copy)
+;; endof kill and copy whone line when no region is active
 
 (defun my/scroll-down()
   (interactive)
@@ -34,10 +52,10 @@
 (global-set-key (kbd "M-<down>") 'my/scroll-down)
 (global-set-key (kbd "M-<up>") 'my/scroll-up)
 
-(use-package ace-jump-mode
+(use-package avy
   :ensure t
   :config
-  (global-set-key (kbd "C-;") 'ace-jump-mode))
+  (global-set-key (kbd "C-;") 'avy-goto-char))
 
 (use-package rg
   :ensure t
@@ -104,12 +122,10 @@
   (if evil-mode
 	  (evil-collection-init)))
 
-(use-package multiple-cursors
+(use-package expand-region
   :ensure t
   :config
-  (global-set-key (kbd "C->") 'mc/mark-next-like-this)
-  (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-  (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
+  (global-set-key (kbd "C-=") 'er/expand-region))
 
 (use-package recentf
   :config

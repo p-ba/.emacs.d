@@ -21,7 +21,7 @@
 (setq use-dialog-box nil)
 
 ;; No popup windows
-(setq pop-up-windows nil)
+;; (setq pop-up-windows nil)
 
 ;; No empty line indicators
 (setq indicate-empty-lines nil)
@@ -30,16 +30,16 @@
 (setq cursor-in-non-selected-windows nil)
 
 ;; Text mode is initial mode
-(setq initial-major-mode 'text-mode)
+;; (setq initial-major-mode 'text-mode)
 
 ;; Text mode is default major mode
-(setq default-major-mode 'text-mode)
+;; (setq default-major-mode 'text-mode)
 
 ;; Moderate font lock
-(setq font-lock-maximum-decoration nil)
+;; (setq font-lock-maximum-decoration nil)
 
 ;; No limit on font lock
-(setq font-lock-maximum-size nil)
+;; (setq font-lock-maximum-size nil)
 
 ;; No line break space points
 (setq auto-fill-mode nil)
@@ -209,6 +209,10 @@
   (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)
   (add-to-list 'dabbrev-ignored-buffer-modes 'tags-table-mode))
 
-(desktop-save-mode 1)
+(use-package dired
+  :config
+  (setf dired-kill-when-opening-new-dired-buffer t))
+
+;; (desktop-save-mode 1)
 
 (provide 'unfuck)

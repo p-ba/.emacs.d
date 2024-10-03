@@ -11,9 +11,26 @@
 
 (use-package consult
   :custom
-  (global-set-key (kbd "s-b") 'consult-bookmark)
   (consult-async-min-input 1)
+  :bind
+  ("s-b" . consult-bookmark)
+  ("C-x b" . consult-buffer)
+  ("C-x 4 b" . consult-buffer-other-window)
+  ("C-x p b" . consult-project-buffer)
+  ("C-x C-r" . consult-recent-file)
+  ("C-x f" . find-file)
+  ("C-x p g" . consult-ripgrep)
   :ensure t)
+
+(use-package embark
+  :ensure t
+  :bind
+  (("C-." . embark-collect)))
+
+(use-package embark-consult
+  :ensure t
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
 
 (use-package orderless
   :ensure t
@@ -27,6 +44,7 @@
   (vertico-mode))
 
 (use-package marginalia
+  :ensure t
   :bind (:map minibuffer-local-map
          ("M-A" . marginalia-cycle))
   :init
@@ -35,6 +53,7 @@
 (use-package lsp-mode
   :hook ((lsp-mode . lsp-enable-which-key-integration))
   :custom
+  (lsp-keep-workspace-alive nil)
   (lsp-enable-symbol-highlighting nil)
   (lsp-completion-provider :none)
   (lsp-lens-enable nil)
