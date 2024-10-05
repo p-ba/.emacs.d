@@ -12,8 +12,5 @@
 (require 'nano-session)
 (require 'nano-modeline)
 (require 'nano-bindings)
-(use-package emacs
-  :config
-  (set-face-attribute 'default nil :font "Iosevka Comfy" :height 170))
 
 (provide 'theme)

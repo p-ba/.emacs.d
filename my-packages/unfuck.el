@@ -191,6 +191,7 @@
 
 (use-package dired
   :custom
+  (setf dired-kill-when-opening-new-dired-buffer t)
   (setq insert-directory-program "gls")
   (dired-use-ls-dired t)
   (dired-recursive-copies 'always)
@@ -202,16 +203,13 @@
   :bind (("M-/" . dabbrev-completion)
          ("C-M-/" . dabbrev-expand))
   :config
+  (global-set-key [remap dabbrev-expand] 'hippie-expand)
   (setq dabbrev-case-fold-search nil
 		dabbrev-case-replace nil)
   (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ")
   (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
   (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)
   (add-to-list 'dabbrev-ignored-buffer-modes 'tags-table-mode))
-
-(use-package dired
-  :config
-  (setf dired-kill-when-opening-new-dired-buffer t))
 
 ;; (desktop-save-mode 1)
 

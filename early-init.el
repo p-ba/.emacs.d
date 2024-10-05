@@ -11,6 +11,15 @@
 			(garbage-collect))
 		  t)
 
+(require 'package)
+(setq package-native-compile t
+	  package-archives '(("nongnu" . "https://elpa.nongnu.org/nongnu/")
+                           ("gnu" . "https://elpa.gnu.org/packages/")
+                           ("melpa" . "https://melpa.org/packages/")
+                           ("devel" . "https://elpa.gnu.org/devel/"))
+      package-archive-priorities '(("devel" . -1))
+      native-comp-async-report-warnings-errors nil)
+
 ;; Always recompile libraries if needed.  This being in early init is in
 ;; line with `auto-compile's manual.
 (let* ((dir "~/.emacs.d/elpa/")

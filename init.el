@@ -1,15 +1,5 @@
 (add-to-list 'load-path (concat user-emacs-directory "my-packages/"))
 (require 'unfuck)
-
-(require 'package)
-(setq package-native-compile t
-	  package-archives '(("nongnu" . "https://elpa.nongnu.org/nongnu/")
-                           ("gnu" . "https://elpa.gnu.org/packages/")
-                           ("melpa" . "https://melpa.org/packages/")
-                           ("devel" . "https://elpa.gnu.org/devel/"))
-      package-archive-priorities '(("devel" . -1))
-      native-comp-async-report-warnings-errors nil)
-
 (require 'theme)
 (require 'prog)
 (require 'autocomplete)
@@ -22,7 +12,7 @@
 (global-set-key (kbd "M-n") 'next-error)
 (global-set-key (kbd "M-p") 'previous-error)
 
-;; kill and copy whone line when no region is active
+;; kill and copy whole line when no region is active
 (defun slick-cut (beg end &optional arg)
   (interactive
    (if mark-active
@@ -39,7 +29,7 @@
      (list (line-beginning-position) (line-beginning-position 2)))))
 
 (advice-add 'kill-ring-save :before #'slick-copy)
-;; endof kill and copy whone line when no region is active
+;; endof kill and copy whole line when no region is active
 
 (defun my/scroll-down()
   (interactive)
@@ -151,6 +141,7 @@
   :ensure t)
 
 (use-package which-key
+  :ensure t
   :config
   (which-key-mode))
 
