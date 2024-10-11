@@ -15,17 +15,23 @@
 
 (use-package treesit-auto
   :ensure t
+  :hook (csharp-ts-mode-hook . csharp-mode)
   :custom
   (treesit-auto-install 'all)
   :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
+  (add-to-list 'treesit-language-source-alist
+               '(php "https://github.com/tree-sitter/tree-sitter-php" "master" "php/src"))
+
+  (add-to-list 'treesit-language-source-alist
+               '(phpdoc "https://github.com/claytonrcarter/tree-sitter-phpdoc" "master" "src"))
+
+  (add-to-list 'treesit-language-source-alist
+               '(jsdoc "https://github.com/tree-sitter/tree-sitter-jsdoc" "master" "src"))
   (add-to-list 'treesit-auto-langs 'php)
+  (add-to-list 'treesit-auto-langs 'phpdoc)
+  (add-to-list 'treesit-auto-langs 'jsdoc)
+  (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
-
-(add-to-list 'treesit-language-source-alist
-             '(php "https://github.com/tree-sitter/tree-sitter-php" "master" "php/src"))
-
-(add-hook 'csharp-ts-mode-hook 'csharp-mode)
 
 (use-package web-mode
   :ensure t)
@@ -39,7 +45,7 @@
 
 (use-package php-mode
   :ensure t
-  :hook (php-mode . detect-web-mode))
+  :hook (php-mode . php-ts-mode))
 
 (use-package php-ts-mode
   :hook (php-ts-mode . detect-web-mode))

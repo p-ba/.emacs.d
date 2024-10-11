@@ -25,7 +25,6 @@
   (interactive
    (if mark-active
        (list (region-beginning) (region-end))
-     (message "Copied line")
      (list (line-beginning-position) (line-beginning-position 2)))))
 
 (advice-add 'kill-ring-save :before #'slick-copy)
@@ -33,11 +32,11 @@
 
 (defun my/scroll-down()
   (interactive)
-  (scroll-down -10))
+  (scroll-down -15))
 
 (defun my/scroll-up()
   (interactive)
-  (scroll-down 10))
+  (scroll-down 15))
 
 (global-set-key (kbd "M-<down>") 'my/scroll-down)
 (global-set-key (kbd "M-<up>") 'my/scroll-up)
@@ -45,25 +44,15 @@
 (use-package avy
   :ensure t
   :config
-  (global-set-key (kbd "C-;") 'avy-goto-char))
+  (global-set-key (kbd "C-;") 'avy-goto-char-timer))
 
-(use-package rg
+(use-package exec-path-from-shell
   :ensure t
   :config
-  (rg-define-search rg-all
-	:dir project
-	:flags ("--no-ignore")))
-
-(defvar-keymap leader-commands
-  :doc "Commands for projects"
-  "f" 'project-find-file
-  "p" 'project-switch-project
-  "g" 'rg-project
-  "r" 'consult-imenu
-  "G" 'rg-all
-  "u" 'php-find-use)
-
-(keymap-set global-map "C-q" leader-commands)
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize))
+  (when (daemonp)
+    (exec-path-from-shell-initialize)))
 
 (defun toggle-evil()
   (interactive)
@@ -98,12 +87,7 @@
 	   #'forward-evil-empty-line)))
   (setq-default evil-symbol-word-search t)
 
-  (evil-set-leader nil (kbd "SPC"))
-  (dolist (keymap leader-commands)
-	(when (consp keymap)
-	  (setq key (car keymap))
-	  (when key
-		(evil-define-key 'normal 'global (kbd (format "<leader>%c" key)) (cdr keymap))))))
+  (evil-set-leader nil (kbd "SPC")))
 
 (use-package evil-collection
   :ensure t

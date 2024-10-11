@@ -191,12 +191,10 @@
 
 (use-package dired
   :custom
-  (setf dired-kill-when-opening-new-dired-buffer t)
-  (setq insert-directory-program "gls")
-  (dired-use-ls-dired t)
   (dired-recursive-copies 'always)
   (dired-auto-revert-buffer t)
-  (dired-listing-switches "-Alhv --group-directories-first"))
+  :config
+  (setf dired-kill-when-opening-new-dired-buffer t))
 
 (use-package dabbrev
   ;; Swap M-/ and C-M-/

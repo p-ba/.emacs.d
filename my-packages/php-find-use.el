@@ -2,6 +2,17 @@
   (message (nth 1 (split-string namespace " ")))
   (format "use %s\\%s;" (substring (nth 1 (split-string namespace " ")) 0 -1) classname))
 
+(setq php-grep-command "grep -r -l --include \'*.php\' \
+-e \'class[[:space:]]*%NAME%[[:space:]]\' \
+-e \'class[[:space:]]*%NAME%$\' \
+-e \'trait[[:space:]]*%NAME%$\' \
+-e \'trait[[:space:]]*%NAME%[[:space:]]\' \
+-e \'interface[[:space:]]*%NAME%$\' \
+-e \'interface[[:space:]]*%NAME%[[:space:]]\' \
+\'%PATH%\' \
+| xargs grep -ohe \'^namespace.*;$\'")
+(setq php-grep-command "rg -l --no-ignore --vimgrep -g \'*.{php}\' \'^(class|interface|trait)[\s]*%NAME%[\s\n]\' \'%PATH%\' | xargs grep -ohe \'^namespace.*;$\'")
+
 (defun php-find-use()
   (interactive)
 
@@ -11,7 +22,7 @@
 	(setq pwd (project-root (project-current))))
   (unless pwd
 	(setq pwd "~/"))
-  
+
   (setq default-search (current-word))
   (setq query (format "Symbol name to import, default %s:" default-search))
   (when (= (length default-search) 0)
@@ -19,8 +30,8 @@
   (setq obj-name (read-string query))
   (when (= (length obj-name) 0)
 	(setq obj-name default-search))
-  
-  (setq out (shell-command-to-string (format "rg -l --no-ignore --vimgrep -g \'*.{php}\' \'^(class|interface|trait)[\s]*%s[\s\n]\' \'%s\' | xargs grep -ohe \'^namespace.*;$\'" obj-name pwd)))
+
+  (setq out (shell-command-to-string (string-replace "%PATH%" pwd (string-replace "%NAME%" obj-name php-grep-command))))
   (setq results '())
   (dolist (namespace (split-string out "\n"))
 	(unless (= (length namespace) 0)
