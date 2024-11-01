@@ -1,8 +1,12 @@
-(use-package nord-theme
+(use-package organic-green-theme
+  :ensure t)
+  ;; :config
+  ;; (load-theme 'organic-green t)
+
+(use-package ef-themes
   :ensure t
   :config
-  (load-theme 'nord t)
-  )
+  (load-theme 'ef-maris-light t))
 
 (use-package font-lock
   :custom-face
@@ -20,7 +24,7 @@
   (web-mode-function-call-face ((t (:foreground unspecified :inherit nil :weight normal)))))
 
 (set-face-attribute 'mode-line nil
-                    :background 'unspecified
+                    ;; :background 'unspecified
                     :box t)
 
 (set-face-attribute 'fringe nil
