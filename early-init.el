@@ -15,11 +15,11 @@
 (setq package-archives '(("nongnu" . "https://elpa.nongnu.org/nongnu/")
                          ("gnu" . "https://elpa.gnu.org/packages/")
                          ("melpa" . "https://melpa.org/packages/")
-                         ("melpa-stable" . "https://stable.melpa.org/packages/")
+                         ;("melpa-stable" . "https://stable.melpa.org/packages/")
                          ("devel" . "https://elpa.gnu.org/devel/"))
       package-archive-priorities '(("gnu"    . 99)
                                    ("nongnu" . 80)
-                                   ("melpa-stable" . 70)
+                                   ;("melpa-stable" . 70)
                                    ("melpa"  . 0)
                                    ("devel" . -1)))
 

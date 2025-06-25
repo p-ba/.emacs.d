@@ -189,17 +189,26 @@
                   (when (= p (point))
                     (apply pop-to-mark args)))))))
 
+(use-package ls-lisp
+  :config
+  (setq ls-lisp-dirs-first t)
+  (setq ls-lisp-use-insert-directory-program nil))
+
 (use-package dired
   :custom
   (dired-recursive-copies 'always)
   (dired-auto-revert-buffer t)
   :config
   (setf dired-kill-when-opening-new-dired-buffer t))
+  ;; (when (eq system-type 'darwin)
+  ;;   (setq insert-directory-program "gls"
+  ;;         dired-use-ls-dired t
+  ;;         dired-listing-switches "-lAhG --group-directories-first")))
 
 (use-package dabbrev
   ;; Swap M-/ and C-M-/
-  :bind (("M-/" . dabbrev-completion)
-         ("C-M-/" . dabbrev-expand))
+  ;; :bind (("M-/" . dabbrev-completion)
+  ;;       ("C-M-/" . dabbrev-expand))
   :config
   (global-set-key [remap dabbrev-expand] 'hippie-expand)
   (setq dabbrev-case-fold-search nil

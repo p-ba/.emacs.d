@@ -4,6 +4,7 @@
 (require 'prog)
 (require 'autocomplete)
 (require 'dumb-import)
+(require 'lsp)
 
 (global-set-key (kbd "s-;") 'pop-to-mark-command)
 (global-set-key (kbd "C-=") 'text-scale-increase)
@@ -44,6 +45,31 @@
 (global-set-key (kbd "M-<down>") 'my/scroll-down)
 (global-set-key (kbd "M-<up>") 'my/scroll-up)
 
+(use-package delsel
+  :ensure nil
+  :hook (after-init . delete-selection-mode))
+
+(defun rgrep-project (arg)
+  (interactive "p")
+  (if buffer-file-truename
+      (setq-local current-ext (car (nreverse (string-split buffer-file-truename "\\."))))
+    (setq-local current-ext nil))
+  (let* ((regex (read-string (format "Pattern, default: %s: " (current-word)) nil nil (current-word)))
+         (ext (read-string (format "Extenions, current: %s: " current-ext) nil nil current-ext))
+         (project (project-current)))
+    (if (< 0 (length ext))
+        (setq grep-find-template (format "fd -t f -e %s -X grep --color=auto -nH -i -e '%s'" ext regex))
+      (setq grep-find-template (format "fd -t f -X grep --color=auto -nH -i -e '%s'" regex)))
+    (if (string-equal "*" ext)
+        (setq grep-find-template (format "fd -t f -X grep --color=auto -nH -i -e '%s'" regex)))
+    (if project
+        (rgrep grep-find-template ext (project-root project))
+      (if default-directory
+          (rgrep grep-find-template ext default-directory)
+        (print "No directory selected")))))
+
+(global-set-key (kbd "C-x p g") 'rgrep-project)
+
 (use-package exec-path-from-shell
   :ensure t
   :config
@@ -63,6 +89,15 @@
   :hook (dired-mode . nerd-icons-dired-mode))
 
 (use-package magit
+  :ensure t)
+
+(require 'server)
+(unless (server-running-p)
+  (server-start))
+
+(use-package wgrep
+  :config
+  (setq wgrep-auto-save-buffer t)
   :ensure t)
 
 (load custom-file 'noerror 'nomessage)

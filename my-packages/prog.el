@@ -17,7 +17,8 @@
 (use-package typescript-mode
   :ensure t)
 
-(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
+(add-hook 'prog-mode-hook #'editorconfig-apply)
+
 (add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
 (add-to-list 'auto-mode-alist '("\\.ya?ml\\'" . yaml-ts-mode))
@@ -25,6 +26,9 @@
 (use-package php-mode
   :ensure t
   :hook (php-mode . detect-web-mode))
+
+(use-package groovy-mode
+  :ensure t)
 
 (use-package markdown-mode
   :ensure t
@@ -37,11 +41,11 @@
   :config
   (yas-global-mode 1))
 
-(unless (package-installed-p 'yasnippet-snippets)
-  (package-vc-install "https://github.com/AndreaCrotti/yasnippet-snippets"))
-
 (use-package highlight-indent-guides
   :ensure t
   :hook ((yaml-ts-mode . highlight-indent-guides-mode)))
+
+(use-package aider
+  :ensure t)
 
 (provide 'prog)

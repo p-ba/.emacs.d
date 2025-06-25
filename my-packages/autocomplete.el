@@ -7,7 +7,7 @@
   :ensure t
   :custom
   (completion-styles '(orderless basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
+  (completion-category-overrides '((file (styles basic flex)))))
 
 (use-package vertico
   :ensure t
