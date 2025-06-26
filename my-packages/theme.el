@@ -12,6 +12,25 @@
 ;;   :config
 ;;   (load-theme 'ef-maris-light t))
 
+;; (use-package nano
+;;   :vc (:url "https://github.com/rougier/nano-emacs" :branch "master")
+;;   :init
+;;   (require 'nano-layout)
+;;   (require 'nano-faces)
+;;   (require 'nano-theme)
+;;   (tool-bar-mode -1)
+;;   (scroll-bar-mode -1)
+;;   (require 'nano-theme-dark)
+;;   (require 'nano-theme-light)
+;;   (nano-theme-set-dark)
+;;   (require 'nano-session)
+;;   (require 'nano-modeline)
+;;   (require 'nano-bindings)
+;;   :config
+;;   (call-interactively 'nano-refresh-theme)
+;;   (custom-set-faces
+;;    '(default ((t (:family "Menlo" :foundry "nil" :slant normal :weight regular :height 180 :width normal))))))
+
 (use-package doom-themes
   :ensure t
   :config

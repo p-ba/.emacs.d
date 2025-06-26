@@ -1,4 +1,5 @@
 (defun lazy-setup ()
+  (setq company-frontends '(company-pseudo-tooltip-frontend company-preview-frontend))
   (remove-hook 'flymake-diagnostic-functions 'eglot-flymake-backend))
 
 (use-package eglot

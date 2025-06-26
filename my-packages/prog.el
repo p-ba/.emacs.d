@@ -10,8 +10,9 @@
 (defun detect-web-mode()
   (setq now (point))
   (goto-line 1)
-  (when (search-forward "?>" nil t)
-	(web-mode))
+  (if (search-forward "?>" nil t)
+	  (web-mode)
+    (php-ts-mode))
   (goto-char now))
 
 (use-package typescript-mode

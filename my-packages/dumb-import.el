@@ -107,17 +107,10 @@ If SYMBOL is provided, only returns files that contain the symbol."
                                         (format "-not -path \"*/%s/*\"" dir))
                                       dumb-import-excluded-directories
                                       " "))
-             (cmd (if symbol
-                      ;; Use find and pipe to grep to filter files containing the symbol
-                      (format "fd -e %s . %s -x grep -l \"%s\" {} \\;"
-                              ext
-                              (shell-quote-argument project-root)
-                              symbol)
-                    ;; Original command without symbol filtering
-                    (format "fd -e %s . %s"
-                            ext
-                            (shell-quote-argument project-root))
-                    )))
+             (cmd (format "find %s -type f %s -name \"*.%s\""
+                          (shell-quote-argument project-root)
+                          exclude-args
+                          ext)))
         (setq file-list (append file-list
                                 (split-string (shell-command-to-string cmd) "\n" t)))))
     file-list))
@@ -137,6 +130,7 @@ Returns a list of (file-path fully-qualified-name) for each match."
                         (regexp-quote symbol)
                         "\\)\\b") nil t)
           (save-excursion
+            (message file)
             (goto-char (point-min))
             (let ((namespace ""))
               (when (re-search-forward "^\\s-*namespace\\s-+\\([^;]+\\);" nil t)
@@ -234,6 +228,7 @@ Only sorts use statements that appear before any class/trait/interface/enum defi
       (when (and start-pos end-pos use-statements)
         (delete-region start-pos end-pos)
         (goto-char start-pos)
+        (insert "\n")
         (dolist (stmt (sort use-statements (lambda (a b) (string< (car a) (car b)))))
           (insert (cdr stmt) "\n"))
         (message "Sorted %d use statements" (length use-statements))))))
