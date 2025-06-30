@@ -1,11 +1,63 @@
 (defvar minimal-emacs--backup-gc-cons-threshold gc-cons-threshold
   "Backup of the original value of `gc-cons-threshold' before startup.")
 
+(defvar emacs-debug nil
+  "Debug flag")
+
+(defvar emacs-native-comp t
+  "Enable natve complilation")
+
+;; Prefer loading newer compiled files
+(setq load-prefer-newer t)
+(setq debug-on-error emacs-debug)
+
 (setq gc-cons-threshold most-positive-fixnum)
 
 (defvar emacs-gc-cons-threshold (* 32 1024 1024))
 
-(setq garbage-collection-messages nil)
+(setq garbage-collection-messages emacs-debug)
+
+;;; Native compilation and Byte compilation
+
+(if (and (featurep 'native-compile)
+         (fboundp 'native-comp-available-p)
+         (native-comp-available-p))
+    (when emacs-native-comp
+      ;; Activate `native-compile'
+      (setq native-comp-deferred-compilation t
+            native-comp-jit-compilation t
+            package-native-compile t))
+  ;; Deactivate the `native-compile' feature if it is not available
+  (setq features (delq 'native-compile features)))
+
+(setq native-comp-warning-on-missing-source emacs-debug
+      native-comp-async-report-warnings-errors (or emacs-debug 'silent)
+      native-comp-verbose (if emacs-debug 1 0))
+
+(setq jka-compr-verbose emacs-debug)
+(setq byte-compile-warnings emacs-debug
+      byte-compile-verbose emacs-debug)
+
+;;; Miscellaneous
+
+(set-language-environment "UTF-8")
+
+;; Set-language-environment sets default-input-method, which is unwanted.
+(setq default-input-method nil)
+
+;; Increase how much is read from processes in a single chunk
+(setq read-process-output-max (* 2 1024 1024))  ; 1024kb
+
+(setq process-adaptive-read-buffering nil)
+
+;; Don't ping things that look like domain names.
+(setq ffap-machine-p-known 'reject)
+
+(setq warning-minimum-level (if emacs-debug :warning :error))
+(setq warning-suppress-types '((lexical-binding)))
+
+(when emacs-debug
+  (setq message-log-max 16384))
 
 (defvar file-name-handler-alist-old file-name-handler-alist)
 
@@ -65,10 +117,11 @@
 
   ;; Unset command line options irrelevant to the current OS. These options
   ;; are still processed by `command-line-1` but have no effect.
-  (unless (eq system-type 'darwin)
-    (setq command-line-ns-option-alist nil))
-  (unless (memq initial-window-system '(x pgtk))
-    (setq command-line-x-option-alist nil)))
+  (unless emacs-debug
+    (unless (eq system-type 'darwin)
+      (setq command-line-ns-option-alist nil))
+    (unless (memq initial-window-system '(x pgtk))
+      (setq command-line-x-option-alist nil))))
 
 (setq inhibit-splash-screen t)
 

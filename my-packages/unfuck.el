@@ -23,6 +23,10 @@
 ;; No popup windows
 ;; (setq pop-up-windows nil)
 
+;; Prefer vertical splits over horizontal ones
+(setq split-width-threshold 120
+      split-height-threshold nil)
+
 ;; No empty line indicators
 (setq indicate-empty-lines nil)
 
@@ -161,17 +165,137 @@
 ;; Start maximized
 (add-hook 'window-setup-hook 'toggle-frame-maximized t)
 
-(global-auto-revert-mode 1)
+;;; Auto revert
+;; Auto-revert in Emacs is a feature that automatically updates the contents of
+;; a buffer to reflect changes made to the underlying file.
+(setq revert-without-query (list ".")  ; Do not prompt
+      auto-revert-stop-on-user-input nil
+      auto-revert-verbose t)
 
-(setq
- ring-bell-function 'ignore
- scroll-preserve-screen-position t
- kill-whole-line 1
- backup-by-copying 1
- custom-file (expand-file-name "init-custom.el" user-emacs-directory)
- save-files-directory (expand-file-name "backups/" user-emacs-directory)
+;; Revert other buffers (e.g, Dired)
+(setq global-auto-revert-non-file-buffers t)
+(setq global-auto-revert-ignore-modes '(Buffer-menu-mode))
+
+;; Avoid backups or lockfiles to prevent creating world-readable copies of files
+(setq create-lockfiles nil)
+(setq make-backup-files nil)
+
+(setq save-files-directory (expand-file-name "backups/" user-emacs-directory)
  auto-save-file-name-transforms `((".*" ,save-files-directory t))
  backup-directory-alist `(("." . ,save-files-directory)))
+(setq tramp-backup-directory-alist backup-directory-alist)
+(setq backup-by-copying-when-linked t)
+(setq backup-by-copying t)  ; Backup by copying rather renaming
+(setq delete-old-versions t)  ; Delete excess backup versions silently
+(setq version-control t)  ; Use version numbers for backup files
+(setq kept-new-versions 5)
+(setq kept-old-versions 5)
+
+;;; Auto save
+
+;; Enable auto-save to safeguard against crashes or data loss. The
+;; `recover-file' or `recover-session' functions can be used to restore
+;; auto-saved data.
+(setq auto-save-default nil)
+(setq auto-save-no-message t)
+
+;; Do not auto-disable auto-save after deleting large chunks of
+;; text.
+(setq auto-save-include-big-deletions t)
+
+(setq auto-save-list-file-prefix
+      (expand-file-name "autosave/" user-emacs-directory))
+(setq tramp-auto-save-directory
+      (expand-file-name "tramp-autosave/" user-emacs-directory))
+
+;;; recentf
+
+;; `recentf' is an that maintains a list of recently accessed files.
+(setq recentf-max-saved-items 300) ; default is 20
+(setq recentf-max-menu-items 15)
+(setq recentf-auto-cleanup (if (daemonp) 300 'never))
+
+;; Update recentf-exclude
+(setq recentf-exclude (list "^/\\(?:ssh\\|su\\|sudo\\)?:"))
+
+;;; saveplace
+
+;; Enables Emacs to remember the last location within a file upon reopening.
+(setq save-place-file (expand-file-name "saveplace" user-emacs-directory))
+(setq save-place-limit 600)
+
+;;; savehist
+
+;; `savehist-mode' is an Emacs feature that preserves the minibuffer history
+;; between sessions.
+(setq history-length 300)
+(setq savehist-save-minibuffer-history t)  ;; Default
+(setq savehist-additional-variables
+      '(kill-ring                        ; clipboard
+        register-alist                   ; macros
+        mark-ring global-mark-ring       ; marks
+        search-ring regexp-search-ring)) ; searches
+
+;;; Text editing, indent, font, and formatting
+
+;; Avoid automatic frame resizing when adjusting settings.
+(setq global-text-scale-adjust-resizes-frames nil)
+
+;; A longer delay can be annoying as it causes a noticeable pause after each
+;; deletion, disrupting the flow of editing.
+(setq delete-pair-blink-delay 0.03)
+
+(setq-default left-fringe-width  8)
+(setq-default right-fringe-width 8)
+
+;; Do not show an arrow at the top/bottomin the fringe and empty lines
+(setq-default indicate-buffer-boundaries nil)
+(setq-default indicate-empty-lines nil)
+
+;; Enable indentation and completion using the TAB key
+(setq tab-always-indent 'complete)
+(setq tab-first-completion 'word-or-paren-or-punct)
+
+;; Perf: Reduce command completion overhead.
+(setq read-extended-command-predicate #'command-completion-default-include-p)
+
+;; Enable multi-line commenting which ensures that `comment-indent-new-line'
+;; properly continues comments onto new lines.
+(setq comment-multi-line t)
+
+;; Ensures that empty lines within the commented region are also commented out.
+;; This prevents unintended visual gaps and maintains a consistent appearance.
+(setq comment-empty-lines t)
+
+;; Eliminate delay before highlighting search matches
+(setq lazy-highlight-initial-delay 0)
+
+;;; Eglot
+
+;; A setting of nil or 0 means Eglot will not block the UI at all, allowing
+;; Emacs to remain fully responsive, although LSP features will only become
+;; available once the connection is established in the background.
+(setq eglot-sync-connect 0)
+
+(setq eglot-autoshutdown t)  ; Shut down server after killing last managed buffer
+
+;; Activate Eglot in cross-referenced non-project files
+(setq eglot-extend-to-xref t)
+
+;;; icomplete
+
+;; Do not delay displaying completion candidates in `fido-mode' or
+;; `fido-vertical-mode'
+(setq icomplete-compute-delay 0.01)
+
+;; No beeping or blinking
+(setq visible-bell nil)
+(setq ring-bell-function #'ignore)
+
+(setq
+ scroll-preserve-screen-position t
+ kill-whole-line 1
+ custom-file (expand-file-name "init-custom.el" user-emacs-directory))
 
 (use-package emacs
   :hook
@@ -207,8 +331,8 @@
 
 (use-package dabbrev
   ;; Swap M-/ and C-M-/
-  ;; :bind (("M-/" . dabbrev-completion)
-  ;;       ("C-M-/" . dabbrev-expand))
+  :bind (("M-/" . dabbrev-completion)
+        ("C-M-/" . dabbrev-expand))
   :config
   (global-set-key [remap dabbrev-expand] 'hippie-expand)
   (setq dabbrev-case-fold-search nil

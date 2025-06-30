@@ -1,7 +1,10 @@
 ;; (ido-mode)
 
-(setq completion-auto-help 'always)
+(setq completion-auto-help nil)
 (setq ido-use-filename-at-point 'guess)
+(fido-vertical-mode)
+
+(setq complietion-styles '(basic flex))
 
 (use-package fzf-native
   :ensure t
@@ -13,36 +16,54 @@
 (use-package fussy
   :ensure t
   :config
+  (setq fussy-score-ALL-fn 'fussy-fzf-score)
+  (setq fussy-filter-fn 'fussy-filter-default)
+  (setq fussy-use-cache t)
+  (setq fussy-compare-same-score-fn 'fussy-histlen->strlen<)
   (fussy-setup)
   (fussy-eglot-setup))
-
-(use-package vertico
-  :ensure t
-  :config
-  (vertico-mode))
 
 (use-package cape
   :ensure t
   :init
-  (add-hook 'completion-at-point-functions #'cape-dabbrev)
-  (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block))
+  (defun cape-dabbrev-dict-keyword ()
+    (cape-wrap-super #'cape-dabbrev #'cape-dict #'cape-keyword))
+  (add-hook 'completion-at-point-functions #'cape-dabbrev-dict-keyword)
+  (add-hook 'completion-at-point-functions #'cape-file))
 
-(with-eval-after-load 'company
-  (define-key company-active-map (kbd "RET") nil)
-  (define-key company-active-map (kbd "<tab>") #'company-complete-selection))
+(use-package completion-preview
+  :ensure nil
+  :bind (:map completion-preview-active-mode-map
+              ("C-n" . #'completion-preview-next-candidate)
+              ("C-p" . #'completion-preview-prev-candidate))
+  :custom
+  (completion-preview-minimum-symbol-length 1)
+  :init
+  (global-completion-preview-mode))
 
-(use-package company
-    :defer 0.1
-    :config
-    (global-company-mode t)
-    (setq-default
-        company-idle-delay 0.05
-        company-require-match nil
-        company-minimum-prefix-length 0
-        company-frontends '(company-preview-frontend)
-        ;; company-frontends '(company-pseudo-tooltip-frontend company-preview-frontend)
-        ))
+(use-package emacs
+  :custom
+  (tab-always-indent 'complete))
+
+(use-package corfu
+  :ensure t
+  :custom
+  ;; Make the popup appear quicker
+  (corfu-popupinfo-delay '(0.5 . 0.5))
+  ;; Always have the same width
+  (corfu-min-width 80)
+  (corfu-max-width corfu-min-width)
+  (corfu-scroll-margin 4)
+  ;; Have Corfu wrap around when going up
+  (corfu-cycle t)
+  (corfu-preselect-first t)
+  :init
+  ;; Enable Corfu
+  (global-corfu-mode t)
+  ;; Enable Corfu history mode to act like `prescient'
+  (corfu-history-mode t)
+  ;; Allow Corfu to show help text next to suggested completion
+  (corfu-popupinfo-mode t))
 
 (use-package marginalia
   :ensure t

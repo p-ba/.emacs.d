@@ -15,21 +15,18 @@
     (php-ts-mode))
   (goto-char now))
 
-(use-package typescript-mode
-  :ensure t)
+(use-package php-ts-mode
+  :hook (php-ts-mode . detect-web-mode))
 
-(add-hook 'prog-mode-hook #'editorconfig-apply)
+(use-package go-ts-mode)
 
-(add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
-(add-to-list 'auto-mode-alist '("\\.ya?ml\\'" . yaml-ts-mode))
+(use-package yaml-ts-mode)
 
-(use-package php-mode
-  :ensure t
-  :hook (php-mode . detect-web-mode))
+(use-package typescript-ts-mode)
 
-(use-package groovy-mode
-  :ensure t)
+(use-package editorconfig
+  :config
+  (editorconfig-mode 1))
 
 (use-package markdown-mode
   :ensure t
