@@ -1,3 +1,14 @@
+;;; init.el --- DESCRIPTION -*- no-byte-compile: t; lexical-binding: t; -*-
+(use-package compile-angel
+  :ensure t
+  :demand t
+  :custom
+  (compile-angel-verbose t)
+  :config
+  (push "/init.el" compile-angel-excluded-files)
+  (push "/early-init.el" compile-angel-excluded-files)
+  (compile-angel-on-load-mode))
+
 (add-to-list 'load-path (concat user-emacs-directory "my-packages/"))
 (require 'unfuck)
 (require 'theme)
@@ -90,10 +101,10 @@
          (ext (read-string (format "Extenions, current: %s: " current-ext) nil nil current-ext))
          (project (project-current)))
     (if (< 0 (length ext))
-        (setq grep-find-template (format "fd -t f -e %s -X grep --color=auto -nHi -B1 -A1 -e '%s'" ext regex))
-      (setq grep-find-template (format "fd -t f -X grep --color=auto -nHi -B1 -A1 -e '%s'" regex)))
+        (setq grep-find-template (format "fd -t f -e %s -X grep --color=auto -nHi -e '%s'" ext regex))
+      (setq grep-find-template (format "fd -t f -X grep --color=auto -nHi -e '%s'" regex)))
     (if (string-equal "*" ext)
-        (setq grep-find-template (format "fd -t f -X grep --color=auto -nHi -B1 -A1 -e '%s'" regex)))
+        (setq grep-find-template (format "fd -t f -X grep --color=auto -nHi -e '%s'" regex)))
     (if project
         (rgrep grep-find-template ext (project-root project))
       (if default-directory
@@ -133,10 +144,6 @@
 
 (use-package magit
   :ensure t)
-
-(require 'server)
-(unless (server-running-p)
-  (server-start))
 
 (use-package wgrep
   :config

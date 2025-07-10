@@ -1,3 +1,5 @@
+;;; lsp.el --- DESCRIPTION -*- no-byte-compile: t; lexical-binding: t; -*-
+
 (defun lazy-setup ()
   (remove-hook 'flymake-diagnostic-functions 'eglot-flymake-backend))
 

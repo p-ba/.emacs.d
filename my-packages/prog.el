@@ -1,3 +1,5 @@
+;;; prog.el --- DESCRIPTION -*- no-byte-compile: t; lexical-binding: t; -*-
+
 (use-package dumb-jump
   :ensure t
   :config
@@ -5,17 +7,19 @@
   (setq dumb-jump-force-searcher 'rg))
 
 (use-package web-mode
-  :ensure t)
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.vue\\'" . web-mode)))
 
 (defun detect-web-mode()
   (setq now (point))
   (goto-line 1)
-  (if (search-forward "?>" nil t)
-	  (web-mode)
-    (php-ts-mode))
+  (when (search-forward "?>" nil t)
+	(web-mode))
   (goto-char now))
 
 (use-package php-ts-mode
+  :mode (("\\.php$" . php-ts-mode))
   :hook (php-ts-mode . detect-web-mode))
 
 (use-package go-ts-mode)
@@ -42,8 +46,5 @@
 (use-package highlight-indent-guides
   :ensure t
   :hook ((yaml-ts-mode . highlight-indent-guides-mode)))
-
-(use-package aider
-  :ensure t)
 
 (provide 'prog)

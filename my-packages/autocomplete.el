@@ -1,10 +1,23 @@
-;; (ido-mode)
+;;; autocomplete.el --- DESCRIPTION -*- no-byte-compile: t; lexical-binding: t; -*-
 
 (setq completion-auto-help nil)
 (setq ido-use-filename-at-point 'guess)
 (fido-vertical-mode)
 
-(setq complietion-styles '(basic flex))
+(setq complietion-styles '(basic substring flex))
+
+(use-package dabbrev
+  ;; Swap M-/ and C-M-/
+  :bind (("M-/" . dabbrev-completion)
+        ("C-M-/" . dabbrev-expand))
+  :config
+  (global-set-key [remap dabbrev-expand] 'hippie-expand)
+  (setq dabbrev-case-fold-search nil
+		dabbrev-case-replace nil)
+  (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ")
+  (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
+  (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)
+  (add-to-list 'dabbrev-ignored-buffer-modes 'tags-table-mode))
 
 (use-package fzf-native
   :ensure t
@@ -40,10 +53,6 @@
   (completion-preview-minimum-symbol-length 1)
   :init
   (global-completion-preview-mode))
-
-(use-package emacs
-  :custom
-  (tab-always-indent 'complete))
 
 (use-package corfu
   :ensure t

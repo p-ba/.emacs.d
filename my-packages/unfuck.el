@@ -1,3 +1,4 @@
+;;; unfuck.el --- DESCRIPTION -*- no-byte-compile: t; lexical-binding: t; -*-
 ;; No startup  screen
 (setq inhibit-startup-screen t)
 
@@ -24,7 +25,7 @@
 ;; (setq pop-up-windows nil)
 
 ;; Prefer vertical splits over horizontal ones
-(setq split-width-threshold 120
+(setq split-width-threshold 140
       split-height-threshold nil)
 
 ;; No empty line indicators
@@ -56,7 +57,7 @@
 
 ;; Completion style, see
 ;; gnu.org/software/emacs/manual/html_node/emacs/Completion-Styles.html
-(setq completion-styles '(basic substring))
+(setq completion-styles '(basic substring partial-completion))
 
 ;; Use RET to open org-mode links, including those in quick-help.org
 (setq org-return-follows-link t)
@@ -77,15 +78,6 @@
 (if (display-graphic-p)
     (menu-bar-mode t) ;; When nil, focus problem on OSX
   (menu-bar-mode -1))
-
-;; Tab behavior
-;; (setq tab-always-indent 'complete)
-;; (global-company-mode)
-;; (define-key company-mode-map [remap indent-for-tab-command]
-;;   #'company-indent-or-complete-common)
-
-;; Pixel scroll (as opposed to char scrool)
-;; (pixel-scroll-mode t)
 
 ;; Mac specific
 (when (eq system-type 'darwin)
@@ -297,49 +289,32 @@
  kill-whole-line 1
  custom-file (expand-file-name "init-custom.el" user-emacs-directory))
 
-(use-package emacs
-  :hook
-  (before-save . delete-trailing-whitespace)
-  :custom
-  (set-mark-command-repeat-pop t)
-  (enable-recursive-minibuffers t)
-  (read-extended-command-predicate #'command-completion-default-include-p) ;; do not show commands that are unavailabe in current mode in M-x results
-  :config
-  (setq require-final-newline t)
-  (advice-add 'pop-to-mark-command :around
+;; Remove training whitespaces and final newline
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+(setq require-final-newline t)
+
+;; Repeat mark pop until there's visible motion detected
+(setq set-mark-command-repeat-pop t)
+(advice-add 'pop-to-mark-command :around
             (lambda (pop-to-mark &rest args)
               (let ((p (point)))
                 (dotimes (_ 5)
                   (when (= p (point))
-                    (apply pop-to-mark args)))))))
+                    (apply pop-to-mark args))))))
 
-(use-package ls-lisp
-  :config
-  (setq ls-lisp-dirs-first t)
-  (setq ls-lisp-use-insert-directory-program nil))
+;; Enable recursive minibuffers
+(setq enable-recursive-minibuffers t)
 
-(use-package dired
-  :custom
-  (dired-recursive-copies 'always)
-  (dired-auto-revert-buffer t)
-  :config
+;; do not show commands that are unavailabe in current mode in M-x results
+(setq read-extended-command-predicate #'command-completion-default-include-p)
+
+(require 'ls-lisp)
+(setq ls-lisp-dirs-first t)
+(setq ls-lisp-use-insert-directory-program nil)
+
+(with-eval-after-load "dired"
+  (setq dired-recursive-copies 'always)
+  (setq dired-auto-revert-buffer t)
   (setf dired-kill-when-opening-new-dired-buffer t))
-  ;; (when (eq system-type 'darwin)
-  ;;   (setq insert-directory-program "gls"
-  ;;         dired-use-ls-dired t
-  ;;         dired-listing-switches "-lAhG --group-directories-first")))
-
-(use-package dabbrev
-  ;; Swap M-/ and C-M-/
-  :bind (("M-/" . dabbrev-completion)
-        ("C-M-/" . dabbrev-expand))
-  :config
-  (global-set-key [remap dabbrev-expand] 'hippie-expand)
-  (setq dabbrev-case-fold-search nil
-		dabbrev-case-replace nil)
-  (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ")
-  (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
-  (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)
-  (add-to-list 'dabbrev-ignored-buffer-modes 'tags-table-mode))
 
 (provide 'unfuck)
