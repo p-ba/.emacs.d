@@ -79,17 +79,6 @@
   (global-set-key (kbd "<mouse-4>") 'scroll-down-line)
   (global-set-key (kbd "<mouse-5>") 'scroll-up-line))
 
-;; No scroll bars
-(set-scroll-bar-mode nil)
-
-;; No toolbar
-(tool-bar-mode -1)
-
-;; No menu bar
-(if (display-graphic-p)
-    (menu-bar-mode t) ;; When nil, focus problem on OSX
-  (menu-bar-mode -1))
-
 ;; Mac specific
 (when (eq system-type 'darwin)
   (setq ns-use-native-fullscreen t
