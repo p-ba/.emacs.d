@@ -57,7 +57,18 @@
 
 ;; Completion style, see
 ;; gnu.org/software/emacs/manual/html_node/emacs/Completion-Styles.html
-(setq completion-styles '(basic substring partial-completion))
+(setq completion-styles '(basic substring))
+
+;; For icomplete it is necessary to use a hook to configure the
+;; completion-styles variable correctly!
+(add-hook 'icomplete-minibuffer-setup-hook
+          (lambda () (kill-local-variable 'completion-styles)))
+
+(setq completion-preview-minimum-symbol-length 1)
+
+(global-completion-preview-mode)
+
+(setq completion-auto-help nil)
 
 ;; Use RET to open org-mode links, including those in quick-help.org
 (setq org-return-follows-link t)
@@ -286,7 +297,6 @@
 
 (setq
  scroll-preserve-screen-position t
- kill-whole-line 1
  custom-file (expand-file-name "init-custom.el" user-emacs-directory))
 
 ;; Remove training whitespaces and final newline

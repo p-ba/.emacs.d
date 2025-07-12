@@ -6,22 +6,30 @@
   (compile-angel-verbose t)
   :config
   (push "/init.el" compile-angel-excluded-files)
+  (push "/init-custom.el" compile-angel-excluded-files)
   (push "/early-init.el" compile-angel-excluded-files)
   (compile-angel-on-load-mode))
 
 (add-to-list 'load-path (concat user-emacs-directory "my-packages/"))
 (require 'unfuck)
 (require 'theme)
+(require 'projectd)
 (require 'prog)
 (require 'autocomplete)
 (require 'dumb-import)
 (require 'lsp)
 
-(global-set-key (kbd "s-;") 'pop-to-mark-command)
-(global-set-key (kbd "C-+") 'text-scale-increase)
-(global-set-key (kbd "C-_") 'text-scale-decrease)
-(global-set-key (kbd "<C-wheel-up>") 'text-scale-increase)
-(global-set-key (kbd "<C-wheel-down>") 'text-scale-decrease)
+(defun adjust-font-height (delta)
+  (let* ((current-height (face-attribute 'default :height))
+         (new-height (+ current-height delta)))
+    (set-face-attribute 'default nil :height new-height)))
+
+(global-set-key (kbd "M-=") (lambda ()
+                              (interactive)
+                              (adjust-font-height 10)))
+(global-set-key (kbd "M--") (lambda ()
+                              (interactive)
+                              (adjust-font-height -10)))
 (global-set-key (kbd "M-n") 'next-error)
 (global-set-key (kbd "M-p") 'previous-error)
 
@@ -73,6 +81,14 @@
 
 (global-set-key (kbd "C-c C-c") 'my/copy-file-path-to-clipboard)
 
+(defun my/nav-project-switch-project (dir)
+  (interactive (list (project-prompt-project-dir)))
+  (let ((project-current-directory-override dir))
+    (print project-current-directory-override)
+    (project-find-file)))
+
+(global-set-key (kbd "C-x p p") 'my/nav-project-switch-project)
+
 (defun my/scroll-down()
   (interactive)
   (next-line 15)
@@ -82,6 +98,8 @@
   (interactive)
   (previous-line 15)
   (recenter))
+
+(global-set-key (kbd "C-g") 'keyboard-quit)
 
 (global-set-key (kbd "M-<down>") 'my/scroll-down)
 (global-set-key (kbd "M-<up>") 'my/scroll-up)
@@ -113,24 +131,14 @@
 
 (global-set-key (kbd "C-x p g") 'rgrep-project)
 
-(use-package zoom
-  :defer t
-  :init
-  (defun size-callback ()
-    (cond ((> (frame-pixel-width) 1280) '(90 . 0.75))
-          (t                            '(0.5 . 0.5))))
-
-  (custom-set-variables
-   '(zoom-size 'size-callback))
-  (zoom-mode))
-
-(use-package exec-path-from-shell
-  :ensure t
-  :config
-  (when (memq window-system '(mac ns x))
-    (exec-path-from-shell-initialize))
-  (when (daemonp)
-    (exec-path-from-shell-initialize)))
+(when (daemonp)
+  (use-package exec-path-from-shell
+    :ensure t
+    :config
+    (when (memq window-system '(mac ns x))
+      (exec-path-from-shell-initialize))
+    (when (daemonp)
+      (exec-path-from-shell-initialize))))
 
 (use-package undo-tree
   :ensure t

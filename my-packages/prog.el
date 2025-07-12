@@ -9,7 +9,8 @@
 (use-package web-mode
   :ensure t
   :config
-  (add-to-list 'auto-mode-alist '("\\.vue\\'" . web-mode)))
+  (define-derived-mode vue-mode web-mode "Vue")
+  (add-to-list 'auto-mode-alist '("\\.vue\\'" . vue-mode)))
 
 (defun detect-web-mode()
   (setq now (point))

@@ -13,7 +13,7 @@
 
 (setq gc-cons-threshold most-positive-fixnum)
 
-(defvar emacs-gc-cons-threshold (* 32 1024 1024))
+(defvar emacs-gc-cons-threshold (* 128 1024 1024))
 
 (setq garbage-collection-messages emacs-debug)
 
@@ -132,4 +132,4 @@
       package-archive-priorities '(("gnu"    . 99)
                                    ("nongnu" . 80)
                                    ("melpa"  . 0)
-                                   ("devel" . -1)))
+                                   ("devel" . 100)))
