@@ -104,10 +104,6 @@
 (global-set-key (kbd "M-<down>") 'my/scroll-down)
 (global-set-key (kbd "M-<up>") 'my/scroll-up)
 
-(use-package delsel
-  :ensure nil
-  :hook (after-init . delete-selection-mode))
-
 (setopt grep-command "grep --color=auto -rni -A1 -B1 ")
 
 (defun rgrep-project (arg)
@@ -146,10 +142,6 @@
   (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
   (global-undo-tree-mode))
 
-(use-package nerd-icons-dired
-  :ensure t
-  :hook (dired-mode . nerd-icons-dired-mode))
-
 (use-package magit
   :ensure t)
 
@@ -157,5 +149,3 @@
   :config
   (setq wgrep-auto-save-buffer t)
   :ensure t)
-
-(load custom-file 'noerror 'nomessage)

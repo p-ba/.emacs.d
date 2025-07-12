@@ -12,14 +12,28 @@
   (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode)
   (add-to-list 'dabbrev-ignored-buffer-modes 'tags-table-mode))
 
-(icomplete-vertical-mode)
 
 (use-package icomplete
   :bind (:map icomplete-minibuffer-map
               ("C-n" . icomplete-forward-completions)
               ("C-p" . icomplete-backward-completions)
               ("C-v" . icomplete-vertical-toggle)
-              ("RET" . icomplete-force-complete-and-exit)))
+              ("RET" . icomplete-force-complete-and-exit))
+  :hook
+  (after-init-hook . (lambda ()
+                       (fido-mode -1)
+                       (icomplete-vertical-mode 1)))
+  :config
+  (setq icomplete-delay-completions-threshold 0)
+  (setq icomplete-compute-delay 0)
+  (setq icomplete-show-matches-on-no-input t)
+  (setq icomplete-hide-common-prefix nil)
+  (setq icomplete-prospects-height 10)
+  (setq icomplete-separator " . ")
+  (setq icomplete-with-completion-tables t)
+  (setq icomplete-in-buffer t)
+  (setq icomplete-max-delay-chars 0)
+  (setq icomplete-scroll t))
 
 (use-package cape
   :ensure t

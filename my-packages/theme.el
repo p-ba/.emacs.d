@@ -1,5 +1,10 @@
 ;;; theme.el --- ui -*- no-byte-compile: t; lexical-binding: t; -*-
 
+(set-face-attribute 'default nil
+                    :family "JetBrains Mono"
+                    :height 200
+                    :weight 'normal)
+
 (defun git-branch-info ()
   "Return current Git branch if available."
   (when (fboundp 'magit-get-current-branch)
@@ -24,15 +29,41 @@
 
     path-to-copy))
 
+(define-key mode-line-major-mode-keymap [header-line]
+            (lookup-key mode-line-major-mode-keymap [mode-line]))
+
+(defun mode-line-render (left right)
+  (let* ((available-width (- (window-width) (length left) )))
+    (format (format "%%s %%%ds" available-width) left right)))
+
 (setq-default mode-line-format
-              '(" " (:eval (current-file-display-name)) ":%l:%c "
-                "("
-                (:eval mode-name)
-                ")"
-                " ["
-                (:eval (git-branch-info))
-                "]"
-                ))
+     '((:eval
+       (mode-line-render
+       (format-mode-line (list
+         (propertize " ☰" 'face `(:inherit mode-line-buffer-id)
+                         'help-echo "Mode(s) menu"
+                         'mouse-face 'mode-line-highlight
+                         'local-map   mode-line-major-mode-keymap)
+         " " (current-file-display-name) " "
+         (if (and buffer-file-name (buffer-modified-p))
+             (propertize "(modified)" 'face `(:inherit face-faded)))))
+       (format-mode-line
+        (propertize "%4l:%2c  " 'face `(:inherit face-faded)))))))
+
+(setq default-frame-alist
+      (append (list '(width  . 72) '(height . 40)
+                    '(vertical-scroll-bars . nil)
+                    '(internal-border-width . 24))))
+
+(set-frame-parameter (selected-frame)
+                     'internal-border-width 24)
+
+(fringe-mode '(0 . 0))
+
+
+(use-package nerd-icons-dired
+  :ensure t
+  :hook (dired-mode . nerd-icons-dired-mode))
 
 (use-package doom-themes
   :ensure t

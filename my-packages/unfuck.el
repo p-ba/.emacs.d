@@ -57,7 +57,11 @@
 
 ;; Completion style, see
 ;; gnu.org/software/emacs/manual/html_node/emacs/Completion-Styles.html
-(setq completion-styles '(basic substring))
+(setq completion-styles '(partial-completion flex initials))
+(setq completion-category-overrides '((file (styles basic substring))))
+(defun setup-minibuffer-completion-styles ()
+  (setq-local completion-styles '(basic substring)))
+(add-hook 'minibuffer-setup-hook #'setup-minibuffer-completion-styles)
 
 ;; For icomplete it is necessary to use a hook to configure the
 ;; completion-styles variable correctly!
@@ -123,6 +127,11 @@
 
 ;; Minimum window height
 (setq window-min-height 1)
+
+(setq display-line-numbers-width 3)
+(setq scroll-margin 5)
+
+(setq line-spacing 2)
 
 ;; Buffer encoding
 (prefer-coding-system       'utf-8)
@@ -206,16 +215,16 @@
 (setq recentf-max-saved-items 300) ; default is 20
 (setq recentf-max-menu-items 15)
 (setq recentf-auto-cleanup (if (daemonp) 300 'never))
-
 ;; Update recentf-exclude
 (setq recentf-exclude (list "^/\\(?:ssh\\|su\\|sudo\\)?:"))
+(recentf-mode)
 
 ;;; saveplace
 
 ;; Enables Emacs to remember the last location within a file upon reopening.
 (setq save-place-file (expand-file-name "saveplace" user-emacs-directory))
 (setq save-place-limit 600)
-
+(save-place-mode)
 ;;; savehist
 
 ;; `savehist-mode' is an Emacs feature that preserves the minibuffer history
@@ -227,6 +236,7 @@
         register-alist                   ; macros
         mark-ring global-mark-ring       ; marks
         search-ring regexp-search-ring)) ; searches
+(savehist-mode)
 
 ;;; Text editing, indent, font, and formatting
 
@@ -284,9 +294,15 @@
 (setq visible-bell nil)
 (setq ring-bell-function #'ignore)
 
-(setq
- scroll-preserve-screen-position t
- custom-file (expand-file-name "init-custom.el" user-emacs-directory))
+(setq scroll-preserve-screen-position t)
+(setq custom-file (expand-file-name "init-custom.el" user-emacs-directory))
+(load custom-file 'noerror 'nomessage)
+
+;; Show the option to show diff of the file when using C-x s or C-x C-c
+(add-to-list 'save-some-buffers-action-alist
+               (list "d"
+                     (lambda (buffer) (diff-buffer-with-file (buffer-file-name buffer)))
+                     "show diff between the buffer and its file"))
 
 ;; Remove training whitespaces and final newline
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
@@ -312,8 +328,56 @@
 (setq ls-lisp-use-insert-directory-program nil)
 
 (with-eval-after-load "dired"
+  ;;(setq dired-listing-switches "-alh")
+  (setq dired-omit-files "^\\.git$\\|^\\.vscode\\|^\\.idea")
   (setq dired-recursive-copies 'always)
   (setq dired-auto-revert-buffer t)
-  (setf dired-kill-when-opening-new-dired-buffer t))
+  (setf dired-kill-when-opening-new-dired-buffer t)
+  (add-hook 'dired-mode-hook (lambda () (dired-omit-mode 1))))
+
+(with-eval-after-load "eshell"
+  (defun eshell-pick-history ()
+    "Show Eshell history combining memory and file persistence."
+    (interactive)
+    ;; Write current session's history to file so it's always fresh
+    (when (bound-and-true-p eshell-history-ring)
+      (eshell-write-history))
+    ;; Then read the history from file
+    (let* ((history-file (expand-file-name "eshell/history" user-emacs-directory))
+           (history-entries (when (file-exists-p history-file)
+                              (with-temp-buffer
+                                (insert-file-contents history-file)
+                                (split-string (buffer-string) "\n" t))))
+           (selection (completing-read "Eshell History: " history-entries)))
+      (when selection
+        (insert selection))))
+
+  (add-hook 'eshell-mode-hook
+            (lambda ()
+              (local-set-key (kbd "C-c l") #'eshell-pick-history)
+              (local-set-key (kbd "C-l")
+                             (lambda ()
+                               (interactive)
+                               (eshell/clear 1)))))
+  ;; GIVES SYNTAX HIGHLIGHTING TO CAT
+  ;;
+  (defun eshell/cat-with-syntax-highlighting (filename)
+    "Like cat(1) but with syntax highlighting.
+  Stole from aweshell"
+    (let ((existing-buffer (get-file-buffer filename))
+          (buffer (find-file-noselect filename)))
+      (eshell-print
+       (with-current-buffer buffer
+         (if (fboundp 'font-lock-ensure)
+             (font-lock-ensure)
+           (with-no-warnings
+             (font-lock-fontify-buffer)))
+         (let ((contents (buffer-string)))
+           (remove-text-properties 0 (length contents) '(read-only nil) contents)
+           contents)))
+      (unless existing-buffer
+        (kill-buffer buffer))
+      nil))
+  (advice-add 'eshell/cat :override #'eshell/cat-with-syntax-highlighting))
 
 (provide 'unfuck)

@@ -23,7 +23,8 @@
   (add-to-list 'eglot-server-programs '(typescript-mode "typescript-language-server" "--stdio"))
   (add-to-list 'eglot-server-programs '(js-mode "typescript-language-server" "--stdio"))
   (add-to-list 'eglot-server-programs '(tsx-mode "typescript-language-server" "--stdio"))
-  (add-to-list 'eglot-server-programs '(jsx-mode "typescript-language-server" "--stdio")))
+  (add-to-list 'eglot-server-programs '(jsx-mode "typescript-language-server" "--stdio"))
+  (add-to-list 'eglot-server-programs '(go-ts-mode "gopls serve")))
 
 (use-package eglot-booster
   :after eglot
