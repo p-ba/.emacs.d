@@ -60,7 +60,6 @@
 
 (fringe-mode '(0 . 0))
 
-
 (use-package nerd-icons-dired
   :ensure t
   :hook (dired-mode . nerd-icons-dired-mode))
@@ -83,5 +82,21 @@
   (setq doom-themes-enable-bold nil    ; if nil, bold is universally disabled
         doom-themes-enable-italic nil) ; if nil, italics is universally disabled
   (load-theme 'doom-nord t))
+
+
+
+;; Transparency
+(dolist (frm (frame-list))
+  (when (eq system-type 'darwin)
+    (set-frame-parameter frm 'alpha '(95 95)))
+  (set-frame-parameter frm 'alpha-background 95))
+
+(unless (display-graphic-p (selected-frame))
+  (send-string-to-terminal
+   (format "\033]11;[90]%s\033\\"
+           (face-attribute 'default :background)))
+  (set-face-background 'default "unspecified-bg" (selected-frame))
+  (set-face-background 'line-number "unspecified-bg" (selected-frame))
+  (set-face-background 'line-number-current-line "unspecified-bg" (selected-frame)))
 
 (provide 'theme)

@@ -81,14 +81,6 @@
 
 (global-set-key (kbd "C-c C-c") 'my/copy-file-path-to-clipboard)
 
-(defun my/nav-project-switch-project (dir)
-  (interactive (list (project-prompt-project-dir)))
-  (let ((project-current-directory-override dir))
-    (print project-current-directory-override)
-    (project-find-file)))
-
-(global-set-key (kbd "C-x p p") 'my/nav-project-switch-project)
-
 (defun my/scroll-down()
   (interactive)
   (next-line 15)
@@ -139,7 +131,7 @@
 (use-package undo-tree
   :ensure t
   :config
-  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo")))
+  (setq undo-tree-history-directory-alist `(("." . ,(concat user-emacs-directory "undo/"))))
   (global-undo-tree-mode))
 
 (use-package magit
